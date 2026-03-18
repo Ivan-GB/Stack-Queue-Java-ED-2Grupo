@@ -20,6 +20,7 @@ public class MyQueue<T> {
             for(int i=0;i<size;i++){
                 NStack[i]=Stack[(top+i)%capacity];
             }
+            top=0;
             Stack=NStack;
         }
     }
