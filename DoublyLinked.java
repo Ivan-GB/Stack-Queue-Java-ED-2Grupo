@@ -24,10 +24,12 @@ public class DoublyLinked<T> {
         } else {
             if (head == tail) {
                 n.prev = tail;
+                n.prev.next = n;
                 tail = n;
                 head.next = tail;
             } else {
                 n.prev = tail;
+                n.prev.next = n;
                 tail = n;
             }
         }
@@ -41,10 +43,12 @@ public class DoublyLinked<T> {
         } else {
             if (head == tail) {
                 n.next = head;
+                n.next.prev = n;
                 head = n;
                 tail.prev = head;
             } else {
                 n.next = head;
+                n.next.prev = n;
                 head = n;
             }
         }
@@ -82,13 +86,13 @@ public class DoublyLinked<T> {
         Node<T> n = head;
         
         while (n != null) {
-            if (n.value == val) {
-                return n;
+            if (n.value.equals(val)) {
+                break;
             }
             n = n.next;
         }
         
-        return null;
+        return n;
     }
     
     public void erase(T val) throws RuntimeException {
@@ -109,8 +113,8 @@ public class DoublyLinked<T> {
     
     public void addBefore(T iVal, T val) throws RuntimeException {
         Node<T> node = new Node<>(val);
-        if (find(iVal) != null) {
-            Node<T> n = find(iVal);
+        Node<T> n = find(iVal);
+        if (n != null) {
             if (n == head) head = node;
             node.next = n;
             node.prev = n.prev;
@@ -123,8 +127,8 @@ public class DoublyLinked<T> {
     
     public void addAfter(T iVal, T val) throws RuntimeException {
         Node<T> node = new Node<>(val);
-        if (find(iVal) != null) {
-            Node<T> n = find(iVal);
+        Node<T> n = find(iVal);
+        if (n != null) {
             if (n == tail) tail = node;
             node.prev = n;
             node.next = n.next;
