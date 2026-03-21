@@ -82,7 +82,7 @@ public class DoublyLinked<T> {
         return tail.value;
     }
     
-    private Node<T> find(T val) {
+    public Node<T> find(T val) {
         Node<T> n = head;
         
         while (n != null) {
