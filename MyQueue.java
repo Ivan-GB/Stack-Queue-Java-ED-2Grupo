@@ -29,10 +29,7 @@ public class MyQueue<T> {
             return null;
         }
         T o=Stack[top];
-        for(int i=0;i<size-1;i++){
-            Stack[(top+i)%capacity]=Stack[((top+i+1)%capacity)];
-        }
-        Stack[(top+size-1)%capacity]=null;
+        top=(top+1)%capacity;
         size--;
         return o;
     }
