@@ -18,7 +18,7 @@ public class MyQueue<T> {
             capacity*=2;
             T[] NStack=(T[])new Object[capacity];
             for(int i=0;i<size;i++){
-                NStack[i]=Stack[(top+i)%capacity];
+                NStack[i]=Stack[(top+i)%(capacity/2)];
             }
             top=0;
             Stack=NStack;
