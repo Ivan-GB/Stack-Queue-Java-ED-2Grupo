@@ -1,7 +1,7 @@
 package lineardatastructures;
 
-public class DoublyLinkedNoTail<T> {
-    public class Node<T> {
+public class DoublyLinkedNoTail<T> implements LinkedLists<T> {
+    public class Node<T> implements NodeInterface<T> {
         T value;
         Node<T> next, prev;
         
@@ -77,7 +77,7 @@ public class DoublyLinkedNoTail<T> {
         return m.value;
     }
     
-    public Node<T> find(T val) {
+    public NodeInterface<T> find(T val) {
         Node<T> n = head;
         
         while (n != null) {
@@ -91,7 +91,7 @@ public class DoublyLinkedNoTail<T> {
     }
     
     public void erase(T val) throws RuntimeException {
-        Node<T> n = find(val);
+        Node<T> n = (Node<T>) find(val);
         if (n != null) {
             Node<T> m = n.prev;
             Node<T> o = n.next;
@@ -107,7 +107,7 @@ public class DoublyLinkedNoTail<T> {
     
     public void addBefore(T iVal, T val) throws RuntimeException {
         Node<T> node = new Node<>(val);
-        Node<T> n = find(iVal);
+        Node<T> n = (Node<T>) find(iVal);
         if (n != null) {
             if (n == head) head = node;
             node.next = n;
@@ -121,7 +121,7 @@ public class DoublyLinkedNoTail<T> {
     
     public void addAfter(T iVal, T val) throws RuntimeException {
         Node<T> node = new Node<>(val);
-        Node<T> n = find(iVal);
+        Node<T> n = (Node<T>) find(iVal);
         if (n != null) {
             node.prev = n;
             node.next = n.next;

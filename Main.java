@@ -6,271 +6,111 @@ import java.util.List;
 import lineardatastructures.*;
 
 public class Main{
+    //Este es para no nos haga trampas el compilador por no usar los returns
+    private static BlackHole bh = new BlackHole();
     //Este parcero nos devuelve el tiempo de ejecución
-    public static long measure(Runnable task){
+    private static long measure(Runnable task){
         long start = System.nanoTime();
         task.run();
         return System.nanoTime() - start;
     }
+
+    private static String[] row(String DS, String op, int size, long nanoTime){
+        return new String[]{DS, op, String.valueOf(size), String.valueOf(nanoTime)};
+    }
+
+    private static void testLinkedList (LinkedLists L, int[] data, int index, int dato, List<String[]> rows, int size, String name){
+        //Llenamos full la list para hacer las mediciones en estructuras llenas:
+        for(int i=0; i<size; i++) L.pushFront(data[i]);
+       
+        long t = measure(()->{
+            L.pushFront(data[0]);
+        });
+        rows.add(row(name, "PushFront", size, t));
+        
+        t = measure(()->{
+            L.pushBack(data[size-1]);
+        });
+        rows.add(row(name, "PushBack", size, t));
+        
+        t = measure(()->{
+            bh.consume(L.isEmpty());
+        });
+        rows.add(row(name, "isEmpty", size, t));
+        
+        t = measure(()->{
+            L.addAfter(data[index], dato);
+        });
+        rows.add(row(name, "AddAfter", size, t));
+        
+        t = measure(()->{
+            L.addBefore(data[index], dato);
+        });
+        rows.add(row(name, "AddBefore", size, t));
+        
+        t = measure(()->{
+            L.find(data[index]);
+        });
+        rows.add(row(name, "Find", size, t));
+        
+        t = measure(()->{
+            //Pasamos un elemento que sí o sí debe estar
+            L.erase(data[index]); 
+        });
+        rows.add(row(name, "Erase", size, t));
+        
+        t = measure(()->{
+            bh.consume(L.popFront());
+        });
+        rows.add(row(name, "PopFront", size, t));
+        
+        t = measure(()->{
+            bh.consume(L.popBack());
+        });
+        rows.add(row(name, "PopBack", size, t));
+    }
+
     public static void main(String[]args) throws IOException {
-        //Aquí ponemos los que necesitamos. Pongo datos temporales para las pruebas
-        int []sizes = {1000, 10000, 100000, 1000000};
-        //Este es para no nos haga trampas el compilador por no usar los returns
-        BlackHole bh = new BlackHole();
+        //Diferentes tamaños a probar
+        int []sizes = {1000, 10000, 100000, 1000000, 10000000, 100000000};
         
         //Esta es la dirección en que se van a guardar los resultados
         String csvPath = "results.csv";
         
-        //Min, max, seed. Se pueden cambiar. Los puse con esos valores para saber si funciona
-        DataGenerator gen = new DataGenerator(1, 750, 330020108);
-        //Vamos a pregenerar los datos para que no contaminen la data. La key es el sie el value una lista con los valores
-        Map<Integer, int[]>pregenData = new HashMap<>();
-        for(int size: sizes){
-            pregenData.put(size, gen.generate(size));
-        }
         //Aquí almacenamos la info
+        List<String[]>rows;
         
-        List<String[]>rows = new ArrayList<>();
-        
-        //El orden en que lo vamos a hacer es importa. Vamos de estrcutura en estructura
+        //El orden en que lo vamos a hacer es importa. Vamos de estructura en estructura
         for(int size: sizes){
-            //Esto generará un número random para el index del addBeore y el addAfter
-            DataGenerator indexes = new DataGenerator(0, size-1, 323213);
-            int ind = indexes.next(); 
-            int dato = indexes.next();
-            int[]data = pregenData.get(size);
+            rows = new ArrayList<>(); //limpiamos arraylist en cada pasada
+
+            DataGenerator generator = new DataGenerator(0, size-1, 323213); //Min, max, seed
+            int[]data = generator.generate(size);
+            //Esto generará un número random para el index del addBefore y el addAfter
+            int ind = generator.next();
+            int dato = generator.next();
             
-            //Single Linked List No Tail
-            
+            //Single Linked List No Tail 
             LinkedList<Integer> sll = new LinkedList<>();
-            //push front. Acá estamos haciendo un push front al sll
-            long t = measure(()->{
-                //Sólo agregamos uno. Si se quiere contabilizar cuánto se demora con los n del size toca meterlo dentro del for
-                //for(int i=0; i<size; i++) 
-                sll.pushFront(data[0]);
-            });
-            rows.add(row("SingleLLNoTail", "PushFront", size, t));
             
-            //Llenamos full la list para hacer luego los otros métodos:
-            for(int i=1; i<size; i++) sll.pushFront(i);
-            //El último elemento se repite dos veces
-            long t2 = measure(()->{
-                sll.pushBack(data[size-1]);
-            });
-            rows.add(row("SingleLLNOTail", "PushBack", size, t2));
-            //sll llena del paso anterior. 
-            long t3 = measure(()->{
-                //Si es toca hacer más mediciones que solo una única instancia, hay que poner el ciclo for
-                //for(int i=0; i<size; i++)
-                bh.consume(sll.isEmpty());
-            });
-            rows.add(row("SingleLLNoTail", "isEmpty", size, t3));
+            testLinkedList (sll, data, ind, dato, rows, size, "SingleLLNoTail");
             
-            long t4 = measure(()->{
-                sll.addAfter(data[ind], dato);
-            });
-            rows.add(row("SingleLLNoTail", "AddAfter", size, t4));
-            
-            long t5 = measure(()->{
-                sll.addBefore(data[ind], dato);
-            });
-            rows.add(row("SingleLLNoTail", "AddBefore", size, t5));
-            
-            long t6 = measure(()->{
-                sll.find(data[ind]);
-            });
-            rows.add(row("SingleLLNoTail", "Find", size, t6));
-            
-            long t7 = measure(()->{
-                //Pasamos un elemento que sí o sí debe estar
-               sll.erase(data[ind]); 
-            });
-            rows.add(row("SingleLLNoTail", "Erase", size, t7));
-            
-            long t8 = measure(()->{
-                bh.consume(sll.popFront());
-            });
-            rows.add(row("SingleLLNoTail", "PopFront", size, t8));
-            
-            long t9 = measure(()->{
-                bh.consume(sll.popBack());
-            });
-            rows.add(row("SingleLLNoTail", "PopBack", size, t9));
-            
-            //Single Linked List With Tail
-            
-            LinkedListWithTail<Integer> llst = new LinkedListWithTail<>();
-            t = measure(()->{
-            //Sólo agregamos uno. Si se quiere contabilizar cuánto se demora con los n del size toca meterlo dentro del for
-            //for(int i=0; i<size; i++) 
-            llst.pushFront(data[0]);
-            });
-            rows.add(row("SingleLLWithTail", "PushFront", size, t));
-            
-            //Llenamos full la list para hacer luego los otros métodos:
-            for(int i=1; i<size; i++) llst.pushFront(i);
-            //El último elemento se repite dos veces
-            t2 = measure(()->{
-                llst.pushBack(data[size-1]);
-            });
-            rows.add(row("SingleLLWithTail", "PushBack", size, t2));
-            //sll llena del paso anterior. 
-            t3 = measure(()->{
-                //Si es toca hacer más mediciones que solo una única instancia, hay que poner el ciclo for
-                //for(int i=0; i<size; i++)
-                bh.consume(llst.isEmpty());
-            });
-            rows.add(row("SingleLLWithTail", "isEmpty", size, t3));
-            
-            t4 = measure(()->{
-                llst.addAfter(data[ind], dato);
-            });
-            rows.add(row("SingleLLWithTail", "AddAfter", size, t4));
-            
-            t5 = measure(()->{
-                llst.addBefore(data[ind], dato);
-            });
-            rows.add(row("SingleLLWithTail", "AddBefore", size, t5));
-            
-            t6 = measure(()->{
-                llst.find(data[ind]);
-            });
-            rows.add(row("SingleLLWithTail", "Find", size, t6));
-            
-            t7 = measure(()->{
-                //Pasamos un elemento que sí o sí debe estar
-               llst.erase(data[ind]); 
-            });
-            rows.add(row("SingleLLWithTail", "Erase", size, t7));
-            
-            t8 = measure(()->{
-                bh.consume(llst.popFront());
-            });
-            rows.add(row("SingleLLWithTail", "PopFront", size, t8));
-            
-            t9 = measure(()->{
-                bh.consume(llst.popBack());
-            });
-            rows.add(row("SingleLLWithTail", "PopBack", size, t9));
-            
+            //Single Linked List With Tail        
+            LinkedListWithTail<Integer> sllt = new LinkedListWithTail<>();
+            testLinkedList (sllt, data, ind, dato, rows, size, "SingleLLWithTail");
+               
             //Doubly Linked List No Tail
-            
             DoublyLinkedNoTail<Integer> dll = new DoublyLinkedNoTail<>();
-            t = measure(()->{
-            //Sólo agregamos uno. Si se quiere contabilizar cuánto se demora con los n del size toca meterlo dentro del for
-            //for(int i=0; i<size; i++) 
-                dll.pushFront(data[0]);
-            });
-            rows.add(row("DoublyLLNoTail", "PushFront", size, t));
-            
-            //Llenamos full la list para hacer luego los otros métodos:
-            for(int i=1; i<size; i++) dll.pushFront(i);
-            //El último elemento se repite dos veces
-            t2 = measure(()->{
-                dll.pushBack(data[size-1]);
-            });
-            rows.add(row("DoublyLLNoTail", "PushBack", size, t2));
-            //dll llena del paso anterior. 
-            t3 = measure(()->{
-                //Si es toca hacer más mediciones que solo una única instancia, hay que poner el ciclo for
-                //for(int i=0; i<size; i++)
-                bh.consume(dll.isEmpty());
-            });
-            rows.add(row("DoublyLLNoTail", "isEmpty", size, t3));
-            
-            t4 = measure(()->{
-                dll.addAfter(data[ind], dato);
-            });
-            rows.add(row("DoublyLLNoTail", "AddAfter", size, t4));
-            
-            t5 = measure(()->{
-                dll.addBefore(data[ind], dato);
-            });
-            rows.add(row("DoublyLLNoTail", "AddBefore", size, t5));
-            
-            t6 = measure(()->{
-                dll.find(data[ind]);
-            });
-            rows.add(row("DoublyLLNoTail", "Find", size, t6));
-            
-            t7 = measure(()->{
-                //Pasamos un elemento que sí o sí debe estar
-               dll.erase(data[ind]); 
-            });
-            rows.add(row("DoublyLLNoTail", "Erase", size, t7));
-            
-            t8 = measure(()->{
-                bh.consume(dll.popFront());
-            });
-            rows.add(row("DoublyLLNoTail", "PopFront", size, t8));
-            
-            t9 = measure(()->{
-                bh.consume(dll.popBack());
-            });
-            rows.add(row("DoublyLLNoTail", "PopBack", size, t9));
+            testLinkedList (dll, data, ind, dato, rows, size, "DoublyLLNoTail");
             
             //Doubly Linked List With Tail
-            
             DoublyLinked<Integer> dllt = new DoublyLinked<>();
-            
-            t = measure(()->{
-            //Sólo agregamos uno. Si se quiere contabilizar cuánto se demora con los n del size toca meterlo dentro del for
-            //for(int i=0; i<size; i++) 
-                dllt.pushFront(data[0]);
-            });
-            rows.add(row("DoublyLLWithTail", "PushFront", size, t));
-            
-            //Llenamos full la list para hacer luego los otros métodos:
-            for(int i=1; i<size; i++) dllt.pushFront(i);
-            //El último elemento se repite dos veces
-            t2 = measure(()->{
-                dllt.pushBack(data[size-1]);
-            });
-            rows.add(row("DoublyLLWithTail", "PushBack", size, t2));
-            //dll llena del paso anterior. 
-            t3 = measure(()->{
-                //Si es toca hacer más mediciones que solo una única instancia, hay que poner el ciclo for
-                //for(int i=0; i<size; i++)
-                bh.consume(dllt.isEmpty());
-            });
-            rows.add(row("DoublyLLWithTail", "isEmpty", size, t3));
-            
-            t4 = measure(()->{
-                dllt.addAfter(data[ind], dato);
-            });
-            rows.add(row("DoublyLLWithTail", "AddAfter", size, t4));
-            
-            t5 = measure(()->{
-                dllt.addBefore(data[ind], dato);
-            });
-            rows.add(row("DoublyLLWithTail", "AddBefore", size, t5));
-            
-            t6 = measure(()->{
-                dllt.find(data[ind]);
-            });
-            rows.add(row("DoublyLLWithTail", "Find", size, t6));
-            
-            t7 = measure(()->{
-                //Pasamos un elemento que sí o sí debe estar
-               dllt.erase(data[ind]); 
-            });
-            rows.add(row("DoublyLLWithTail", "Erase", size, t7));
-            
-            t8 = measure(()->{
-                bh.consume(dllt.popFront());
-            });
-            rows.add(row("DoublyLLWithTail", "PopFront", size, t8));
-            
-            t9 = measure(()->{
-                bh.consume(dllt.popBack());
-            });
-            rows.add(row("DoublyLLWithTail", "PopBack", size, t9));
+            testLinkedList (dll, data, ind, dato, rows, size, "DoublyLLWithTail");
             
             //MyQueue
-            
             MyQueue<Integer> mq = new MyQueue<>();
             
-            t = measure(()->{
+            long t = measure(()->{
                 mq.enqueue(data[0]);
             });
             rows.add(row("MyQueue", "Enqueue", size, t));
@@ -278,34 +118,33 @@ public class Main{
             //Llenamos la queue:
             for(int i=1; i<size; i++) mq.enqueue(data[i]);
             
-            t2 = measure(()->{
+            t = measure(()->{
                bh.consume(mq.dequeue());
             });
-            rows.add(row("MyQueue", "Dequeue", size, t2));
+            rows.add(row("MyQueue", "Dequeue", size, t));
             
-            t3 = measure(()->{
+            t = measure(()->{
                 mq.delete(data[ind]);
             });
-            rows.add(row("MyQueue", "Delete", size, t3));
+            rows.add(row("MyQueue", "Delete", size, t));
             
             //Lo dejo como front porque así aparece en el doc guía
-            t4 = measure(()->{
+            t = measure(()->{
                 bh.consume(mq.peek());
             });
-            rows.add(row("MyQueue", "Front", size, t4));
+            rows.add(row("MyQueue", "Front", size, t));
             
-            t5 = measure(()->{
+            t = measure(()->{
                 bh.consume(mq.size());
             });
-            rows.add(row("MyQueue", "Size", size, t5));
+            rows.add(row("MyQueue", "Size", size, t));
             
-            t6 = measure(()->{
+            t = measure(()->{
                 bh.consume(mq.isEmpty());
             });
-            rows.add(row("MyQueue", "isEmpty", size, t6));
+            rows.add(row("MyQueue", "isEmpty", size, t));
 
-            //MyStack
-            
+            //Stack
             MyStack<Integer> ms = new MyStack<>();
             
             t = measure(()->{
@@ -316,37 +155,34 @@ public class Main{
             //Llenamos la queue:
             for(int i=1; i<size; i++) ms.push(data[i]);
             
-            t2 = measure(()->{
+            t = measure(()->{
                bh.consume(ms.pop());
             });
-            rows.add(row("MyStack", "Pop", size, t2));
+            rows.add(row("MyStack", "Pop", size, t));
             
-            t3 = measure(()->{
+            t = measure(()->{
                 ms.delete(data[ind]);
             });
-            rows.add(row("MyStack", "Delete", size, t3));
+            rows.add(row("MyStack", "Delete", size, t));
             
-            t4 = measure(()->{
+            t = measure(()->{
                 bh.consume(ms.peek());
             });
-            rows.add(row("MyStack", "Peek", size, t4));
+            rows.add(row("MyStack", "Peek", size, t));
             
-            t5 = measure(()->{
+            t = measure(()->{
                 bh.consume(ms.size());
             });
-            rows.add(row("MyStack", "Size", size, t5));
+            rows.add(row("MyStack", "Size", size, t));
             
-            t6 = measure(()->{
+            t = measure(()->{
                 bh.consume(ms.isEmpty());
             });
-            rows.add(row("MyStack", "isEmpty", size, t6));
+            rows.add(row("MyStack", "isEmpty", size, t));
+
+            //Exportamos la info que quedó contenido en rows.
+            CsvExporter.exportar(rows, csvPath);
         }
-        
-        //Exportamos la info que quedó contenido en rows. La path se cambia desde la variable que está al inicio
-        CsvExporter.exportar(rows, csvPath);
     }
     
-    private static String[] row(String DS, String op, int size, long nanoTime){
-        return new String[]{DS, op, String.valueOf(size), String.valueOf(nanoTime)};
-    }
 }

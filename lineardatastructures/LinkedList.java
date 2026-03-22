@@ -1,8 +1,8 @@
 package lineardatastructures;
 
-public class LinkedList<T> {
+public class LinkedList<T> implements LinkedLists<T> {
     
-    public class Node<T> {
+    public class Node<T> implements NodeInterface<T> {
         T value;
         Node<T> next;
         
@@ -97,7 +97,7 @@ public class LinkedList<T> {
         return curr.value;
     }
     
-    public Node<T> find(T value) {
+    public NodeInterface<T> find(T value) {
         Node<T> curr = head;
         
         while(curr != null) {
